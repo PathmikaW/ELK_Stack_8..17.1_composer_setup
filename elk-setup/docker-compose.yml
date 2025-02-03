@@ -111,7 +111,7 @@ services:
       - ./certs:/usr/share/kibana/config/certs
     environment:
       - ELASTICSEARCH_HOSTS=["https://elasticsearch1:9200"]
-      - ELASTICSEARCH_SERVICEACCOUNTTOKEN=my-kibana-token
+      - ELASTICSEARCH_SERVICEACCOUNTTOKEN=AAEAAWVsYXN0aWMva2liYW5hL2RlZmF1bHQ6M3RYS09BZGRRNlNDVXdNNlFxTVZfZw
       - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/kibana/config/certs/ca.crt
     ports:
       - 5601:5601

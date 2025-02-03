@@ -1,4 +1,4 @@
 server.host: "0.0.0.0"
 elasticsearch.hosts: ["https://elasticsearch1:9200"]
-elasticsearch.serviceAccountToken: "my-kibana-token"
+elasticsearch.serviceAccountToken: "AAEAAWVsYXN0aWMva2liYW5hL2RlZmF1bHQ6M3RYS09BZGRRNlNDVXdNNlFxTVZfZw"
 elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/certs/ca.crt"]
