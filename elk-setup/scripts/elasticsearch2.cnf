@@ -2,8 +2,8 @@
 default_bits       = 4096
 default_md         = sha256
 distinguished_name = req_distinguished_name
+req_extensions     = req_ext
 prompt             = no
-
 [ req_distinguished_name ]
 C  = US
 ST = California
@@ -11,3 +11,10 @@ L  = SanFrancisco
 O  = MyCompany
 OU = IT
 CN = elasticsearch2
+[ req_ext ]
+subjectAltName = @alt_names
+[ alt_names ]
+DNS.1 = elasticsearch2
+DNS.2 = localhost
+IP.1  = 127.0.0.1
+IP.2  = 172.18.0.4 # Replace with actual container IP if known

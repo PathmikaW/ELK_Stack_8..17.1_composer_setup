@@ -5,6 +5,8 @@ services:
   elasticsearch1:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1
     container_name: elasticsearch1
+    env_file:
+      - .env
     environment:
       - node.name=elasticsearch1
       - cluster.name=es-docker-cluster
@@ -12,7 +14,7 @@ services:
       - cluster.initial_master_nodes=elasticsearch1,elasticsearch2,elasticsearch3
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-      - ELASTIC_PASSWORD=changeme
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=true
       - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/elasticsearch1.key
@@ -40,6 +42,8 @@ services:
   elasticsearch2:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1
     container_name: elasticsearch2
+    env_file:
+      - .env
     environment:
       - node.name=elasticsearch2
       - cluster.name=es-docker-cluster
@@ -47,7 +51,7 @@ services:
       - cluster.initial_master_nodes=elasticsearch1,elasticsearch2,elasticsearch3
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-      - ELASTIC_PASSWORD=changeme
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=true
       - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/elasticsearch2.key
@@ -73,6 +77,8 @@ services:
   elasticsearch3:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1
     container_name: elasticsearch3
+    env_file:
+      - .env
     environment:
       - node.name=elasticsearch3
       - cluster.name=es-docker-cluster
@@ -80,7 +86,7 @@ services:
       - cluster.initial_master_nodes=elasticsearch1,elasticsearch2,elasticsearch3
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-      - ELASTIC_PASSWORD=changeme
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=true
       - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/elasticsearch3.key
@@ -106,12 +112,15 @@ services:
   kibana:
     image: docker.elastic.co/kibana/kibana:8.17.1
     container_name: kibana
+    env_file:
+      - .env
     volumes:
       - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml
       - ./certs:/usr/share/kibana/config/certs
     environment:
       - ELASTICSEARCH_HOSTS=["https://elasticsearch1:9200"]
-      - ELASTICSEARCH_SERVICEACCOUNTTOKEN=AAEAAWVsYXN0aWMva2liYW5hL2RlZmF1bHQ6M3RYS09BZGRRNlNDVXdNNlFxTVZfZw
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_SYSTEM_PASSWORD}
       - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/kibana/config/certs/ca.crt
     ports:
       - 5601:5601
@@ -124,18 +133,33 @@ services:
   logstash:
     image: docker.elastic.co/logstash/logstash:8.17.1
     container_name: logstash
+    env_file:
+      - .env
     volumes:
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./logstash/pipeline/logstashTest.conf:/usr/share/logstash/pipeline/logstashTest.conf
       - ./certs:/usr/share/logstash/config/certs
     environment:
       - LS_JAVA_OPTS=-Xmx512m -Xms512m
       - ELASTICSEARCH_HOSTS=["https://elasticsearch1:9200"]
       - ELASTICSEARCH_USERNAME=elastic
-      - ELASTICSEARCH_PASSWORD=changeme
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
       - ELASTICSEARCH_SSL_CERTIFICATE_AUTHORITY=/usr/share/logstash/config/certs/ca.crt
     ports:
       - 5044:5044
+    networks:
+      - elk
+
+  # Filebeat
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.17.1
+    container_name: filebeat
+    env_file:
+      - .env
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./certs:/usr/share/logstash/config/certs
     networks:
       - elk
     depends_on:
